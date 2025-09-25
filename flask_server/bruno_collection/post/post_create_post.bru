@@ -1,0 +1,21 @@
+meta {
+  name: post_create_post
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:5000/posts
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "title": "testcreate",
+    "content": "testcreate",
+    "tag_ids": [1,2,4]
+  }
+  
+    
+}
