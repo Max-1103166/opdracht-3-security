@@ -11,7 +11,7 @@ ENV PORT=$PORT
 EXPOSE $PORT
 
 # Install global dependencies
-RUN npm install -g npm@latest expo-cli@latest
+RUN #npm install -g npm@latest expo-cli@latest
 
 # Create and set working directory
 WORKDIR /app
