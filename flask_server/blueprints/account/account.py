@@ -5,7 +5,8 @@ from blueprints.account.models.account_model import Account
 from flask import Blueprint, current_app, jsonify, request, send_from_directory
 from flask_cors import CORS, cross_origin
 from flask_jwt_extended import *
-
+from argon2 import PasswordHasher
+PasswordHasher = PasswordHasher()
 account_bp = Blueprint("account", __name__)
 CORS(account_bp)
 
@@ -27,17 +28,19 @@ def login_api():
     if user["is_banned"] != False:
         return jsonify({"message": "Uw account is geblokkeerd"}), 400
 
-    if bcrypt.checkpw(login_password.encode("utf-8"), user["hashed_password"]):
-        access_token = create_access_token(
-            identity=login_email,
-            additional_claims={
-                "user_id": user["id"],
-                "is_admin": user["is_admin"],
-            },
-        )
-        return jsonify({"access_token": access_token}), 200
+    try:
+        PasswordHasher.verify(user["hashed_password"], login_password)
+    except Exception:
+        return jsonify({"message": "Foutieve login!"}), 401
 
-    return jsonify({"message": "Foutieve login!"}), 401
+    access_token = create_access_token(
+        identity=login_email,
+        additional_claims={
+            "user_id": user["id"],
+            "is_admin": user["is_admin"],
+        },
+    )
+    return jsonify({"access_token": access_token}), 200
 
 
 @account_bp.route("/profile/<int:user_id>", methods=["GET"])

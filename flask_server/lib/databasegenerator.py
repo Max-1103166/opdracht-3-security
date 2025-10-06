@@ -1,7 +1,7 @@
 import sqlite3
 from pathlib import Path
-
-import bcrypt
+from argon2 import PasswordHasher
+PasswordHasher = PasswordHasher()
 
 
 class DatabaseGenerator:
@@ -256,9 +256,7 @@ class DatabaseGenerator:
         ]
 
         for user in users:
-            user["password"] = bcrypt.hashpw(
-                user["password"].encode("utf-8"), bcrypt.gensalt()
-            )
+            user["password"] = PasswordHasher.hash(user["password"])
 
         list_of_parameters = [
             (

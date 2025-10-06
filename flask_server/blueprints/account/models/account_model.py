@@ -2,10 +2,9 @@ import base64
 import os
 import sqlite3
 import uuid
-
-import bcrypt
+from argon2 import PasswordHasher
 from flask_jwt_extended import *
-
+PasswordHasher = PasswordHasher()
 
 class Account:
     def __init__(self):
@@ -124,12 +123,13 @@ class Account:
 
             stored_hashed_password = user_query_result["password"]
 
-            if not bcrypt.checkpw(old_password.encode("utf-8"), stored_hashed_password):
+            try:
+                PasswordHasher.verify(stored_hashed_password, old_password)
+            except Exception:
                 return False, "Huidige wachtwoord is incorrect."
 
-            new_hashed_password = bcrypt.hashpw(
-                new_password.encode("utf-8"), bcrypt.gensalt()
-            )
+            new_hashed_password = PasswordHasher.hash(new_password)
+
             cursor.execute(
                 "UPDATE users SET password = ? WHERE id = ?",
                 (new_hashed_password, user_id),
@@ -219,9 +219,7 @@ class Account:
     def register_user(self, user_data):
         cursor, con = self.connect_db()
         try:
-            hashed_password = bcrypt.hashpw(
-                user_data["password"].encode("utf-8"), bcrypt.gensalt()
-            )
+            hashed_password = PasswordHasher.hash( user_data["password"].encode("utf-8"))
 
             image_filename = self.save_base64_image(user_data.get("profile_image"))
 
