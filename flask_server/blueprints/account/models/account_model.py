@@ -219,7 +219,7 @@ class Account:
     def register_user(self, user_data):
         cursor, con = self.connect_db()
         try:
-            hashed_password = PasswordHasher.hash( user_data["password"].encode("utf-8"))
+            hashed_password = PasswordHasher.hash( user_data["password"])
 
             image_filename = self.save_base64_image(user_data.get("profile_image"))
 
